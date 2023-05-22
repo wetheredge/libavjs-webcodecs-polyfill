@@ -18,7 +18,6 @@
  */
 
 import * as vf from "./video-frame";
-import '@ungap/global-this';
 
 import type * as LibAVJS from "libav.js";
 declare let LibAV: LibAVJS.LibAVWrapper;

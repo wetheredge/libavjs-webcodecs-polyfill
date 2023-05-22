@@ -34,7 +34,7 @@ import * as libav from "./libav";
 import * as misc from "./misc";
 
 import type * as LibAVJS from "libav.js";
-import '@ungap/global-this';
+
 declare let LibAV: LibAVJS.LibAVWrapper;
 
 /**

@@ -1,6 +1,14 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "lib": ["es2015", "dom"]
-    }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["ES6", "DOM"],
+    "declaration": true,
+    "module": "ES6",
+    "moduleResolution": "bundler",
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }

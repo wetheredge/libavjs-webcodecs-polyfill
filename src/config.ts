@@ -26,7 +26,6 @@ import * as evc from "./encoded-video-chunk";
 import * as vf from "./video-frame";
 import * as vdec from "./video-decoder";
 import * as venc from "./video-encoder";
-import '@ungap/global-this';
 
 /**
  * An AudioDecoder environment.
