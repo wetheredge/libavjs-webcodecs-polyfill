@@ -6,7 +6,9 @@ export default defineConfig({
 		lib: {
 			entry: 'src/main.ts',
 			name: 'LibAVWebCodecs',
-			fileName: 'libav-webcodecs-polyfill',
+			fileName: format => format === 'umd'
+				? 'libav-webcodecs-polyfill.umd.js'
+				: 'libav-webcodecs-polyfill.js',
 		},
 		sourcemap: true,
 		rollupOptions: {

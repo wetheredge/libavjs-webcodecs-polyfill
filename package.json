@@ -19,7 +19,7 @@
       "types": "./dist/main.d.ts",
       "default": "./dist/libav-webcodecs-polyfill.js"
     },
-    "./umd": "./dist/libav-webcodecs-polyfill.umd.cjs"
+    "./umd": "./dist/libav-webcodecs-polyfill.umd.js"
   },
   "types": "./dist/main.d.ts",
   "main": "./dist/libav-webcodecs-polyfill.js",
