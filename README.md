@@ -1,5 +1,12 @@
 # LibAVJS-WebCodecs-Polyfill
 
+The main difference between this version and [upstream] is that this is built
+for ES6, not ES5, which reduces filesize somewhat. It also provides a native ES
+Modules build by default, with a UMD version at the `/umd` export. Major & minor
+version numbers will track upstream.
+
+---
+
 This is a polyfill for the [WebCodecs API](https://w3c.github.io/webcodecs/).
 
 No, really.
@@ -139,3 +146,5 @@ LibAVJS-WebCodecs-Polyfill always lets the event queue finish.
 The framerate reported to video codecs is the nearest whole number to the input
 framerate. This should usually only affect bitrate and latency calculations, as
 each frame is individually timestamped.
+
+[upstream]: https://github.com/ennuicastr/libavjs-webcodecs-polyfill
