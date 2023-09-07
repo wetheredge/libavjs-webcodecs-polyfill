@@ -42,6 +42,7 @@ declare let LibAV: LibAVJS.LibAVWrapper;
  */
 export async function load(options: {
     polyfill?: boolean,
+    LibAV?: LibAVJS.LibAVWrapper,
     libavOptions?: any
 } = {}) {
     // Set up libavOptions
@@ -50,15 +51,15 @@ export async function load(options: {
         Object.assign(libavOptions, options.libavOptions);
 
     // Maybe load libav
-    if (typeof LibAV === "undefined") {
+    if (!options.LibAV && typeof LibAV === "undefined") {
         await new Promise((res, rej) => {
             // Can't load workers from another origin
             libavOptions.noworker = true;
 
             // Load libav
-            LibAV = <any> {base: "https://unpkg.com/libav.js@3.10.5"};
+            LibAV = <any> {base: "https://unpkg.com/libav.js@4.3.6/dist"};
             const scr = document.createElement("script");
-            scr.src = "https://unpkg.com/libav.js@3.10.5/libav-3.10.5.1.2-webm-opus-flac.js";
+            scr.src = "https://unpkg.com/libav.js@4.3.6/dist/libav-4.3.6.0-open-media.js";
             scr.onload = res;
             scr.onerror = rej;
             document.body.appendChild(scr);
@@ -66,6 +67,8 @@ export async function load(options: {
     }
 
     // And load the libav handler
+    if (options.LibAV)
+        libav.setLibAV(options.LibAV);
     libav.setLibAVOptions(libavOptions);
     await libav.load();
 

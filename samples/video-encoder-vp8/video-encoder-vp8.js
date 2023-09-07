@@ -1,3 +1,30 @@
+/*
+ * This (un)license applies only to this sample code, and not to
+ * libavjs-webcodecs-polyfill as a whole:
+ *
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or distribute
+ * this software, either in source code form or as a compiled binary, for any
+ * purpose, commercial or non-commercial, and by any means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors of
+ * this software dedicate any and all copyright interest in the software to the
+ * public domain. We make this dedication for the benefit of the public at
+ * large and to the detriment of our heirs and successors. We intend this
+ * dedication to be an overt act of relinquishment in perpetuity of all present
+ * and future rights to this software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+importScripts("../worker-util.js");
+
 (async function() {
     await LibAVWebCodecs.load();
 
@@ -10,7 +37,7 @@
         const frames = [];
         const decoder = new VideoDecoder({
             output: frame => frames.push(frame),
-            error: x => alert(x)
+            error: x => console.error
         });
         decoder.configure({
             codec: "vp8",
@@ -49,7 +76,7 @@
         const packets = [];
         const encoder = new VideoEncoder({
             output: packet => packets.push(packet),
-            error: x => alert(x)
+            error: x => { throw new Error(x); }
         });
         encoder.configure({
             codec: "vp8",
@@ -73,24 +100,25 @@
         await encoder.flush();
         encoder.close();
 
-        const opus = await sampleMux("tmp.webm", "libvpx", packets);
-        const video = document.createElement("video");
-        video.src = URL.createObjectURL(new Blob([opus]));
-        video.controls = true;
-        document.body.appendChild(video);
+        return await sampleMux("tmp.webm", "libvpx", packets);
     }
 
     let preEncode = performance.now();
-    await encode(LibAVWebCodecs.VideoEncoder, LibAVWebCodecs.VideoFrame);
+    const a = await encode(LibAVWebCodecs.VideoEncoder, LibAVWebCodecs.VideoFrame);
     let postEncode = performance.now();
-    if (typeof VideoEncoder !== "undefined")
-        await encode(VideoEncoder, VideoFrame);
+    let b = null;
+    if (typeof VideoEncoder !== "undefined") {
+        try {
+            b = await encode(VideoEncoder, VideoFrame);
+        } catch (ex) { console.error(ex); }
+    }
     let postEncode2 = performance.now();
 
-    const report = document.createElement("div");
-    report.innerText = "Decode time: " + ~~(postDecode - preDecode) +
+    postMessage({
+        a, b,
+        report: "Decode time: " + ~~(postDecode - preDecode) +
         "ms. Encode time: " + ~~(postEncode - preEncode) +
         "ms. Encode time (browser implementation): " +
-        ~~(postEncode2 - postEncode) + "ms.";
-    document.body.appendChild(report);
+        ~~(postEncode2 - postEncode) + "ms."
+    });
 })();

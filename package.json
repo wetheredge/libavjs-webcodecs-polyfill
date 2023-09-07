@@ -1,6 +1,6 @@
 {
   "name": "@wetheredge/libavjs-webcodecs-polyfill",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "A WebCodecs polyfill (ponyfill, really), using libav.js",
   "author": "Yahweasel",
   "license": "0BSD",
@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "libav.js": "^3.10.5"
+    "libav.js": "=4.3.6"
   },
   "devDependencies": {
     "typescript": "^5.0.4",

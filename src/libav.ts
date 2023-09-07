@@ -20,6 +20,9 @@
 import type * as LibAVJS from "libav.js";
 declare let LibAV: LibAVJS.LibAVWrapper;
 
+// Wrapper function to use
+export let LibAVWrapper: LibAVJS.LibAVWrapper = null;
+
 // Currently available libav instances
 const libavs: LibAVJS.LibAV[] = [];
 
@@ -47,6 +50,13 @@ export interface LibAVJSCodec {
 }
 
 /**
+ * Set the libav wrapper to use.
+ */
+export function setLibAV(to: LibAVJS.LibAVWrapper) {
+    LibAVWrapper = to;
+}
+
+/**
  * Set the libav loading options.
  */
 export function setLibAVOptions(to: any) {
@@ -59,7 +69,7 @@ export function setLibAVOptions(to: any) {
 export async function get(): Promise<LibAVJS.LibAV> {
     if (libavs.length)
         return libavs.shift();
-    return await LibAV.LibAV(libavOptions);
+    return await LibAVWrapper.LibAV(libavOptions);
 }
 
 /**
@@ -103,6 +113,7 @@ async function codecs(encoders: boolean): Promise<string[]> {
  * Load the lists of supported decoders and encoders.
  */
 export async function load() {
+    LibAVWrapper = LibAVWrapper || LibAV;
     decoders = await codecs(false);
     encoders = await codecs(true);
 }
@@ -112,7 +123,7 @@ export async function load() {
  * to libav.js. Returns null if unsupported.
  */
 export function decoder(
-    codec: string | {libavjs: LibAVJSCodec}
+    codec: string | {libavjs: LibAVJSCodec}, config: any
 ): LibAVJSCodec {
     if (typeof codec === "string") {
         codec = codec.replace(/\..*/, "");
@@ -121,13 +132,25 @@ export function decoder(
         switch (codec) {
             // Audio
             case "flac":
+                if (typeof config.description === "undefined") {
+                    // description is required per spec, but one can argue, if this limitation makes sense
+                    return null;
+                }
                 break;
 
             case "opus":
+                if (typeof config.description !== "undefined") {
+                    // ogg bitstream is not supported by the current implementation
+                    return null;
+                }
                 outCodec = "libopus";
                 break;
 
             case "vorbis":
+                if (typeof config.description === "undefined") {
+                    // description is required per spec, but one can argue, if this limitation makes sense
+                    return null;
+                }
                 outCodec = "libvorbis";
                 break;
 
@@ -231,6 +254,10 @@ export function encoder(
                     if (typeof opus.usedtx === "boolean") {
                         // We don't support the usedtx option
                         return null;
+                    }
+                    if (typeof opus.format === "string") {
+                        // ogg bitstream is not supported
+                        if (opus.format !== "opus") return null;
                     }
                 }
                 break;

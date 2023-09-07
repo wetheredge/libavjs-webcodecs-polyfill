@@ -17,10 +17,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import * as libav from "./libav";
 import * as vf from "./video-frame";
 
 import type * as LibAVJS from "libav.js";
-declare let LibAV: LibAVJS.LibAVWrapper;
 
 /* A non-threaded libav.js instance for scaling. This is an any because the
  * type definitions only expose the async versions, but this API requires the
@@ -46,8 +46,12 @@ let origCreateImageBitmap: any = null;
  */
 export async function load(libavOptions: any, polyfill: boolean) {
     // Get our scalers
-    scalerSync = await LibAV.LibAV({noworker: true});
-    scalerAsync = await LibAV.LibAV(libavOptions);
+    if ("importScripts" in globalThis) {
+        // Make sure the worker code doesn't run
+        (<any> libav.LibAVWrapper).nolibavworker = true;
+    }
+    scalerSync = await libav.LibAVWrapper.LibAV({noworker: true});
+    scalerAsync = await libav.LibAVWrapper.LibAV(libavOptions);
 
     // Polyfill drawImage
     if ('CanvasRenderingContext2D' in globalThis) {
@@ -201,9 +205,9 @@ export function canvasDrawImage(
     for (let i = 0; i < frame.data.length; i++) {
         const plane = frame.data[i];
         for (let y = 0; y < plane.length; y++) {
-            const row = plane[y];
+            const row = plane[y].subarray(0, image.codedWidth * 4);
             frameData.data.set(row, idx);
-            idx += row.length
+            idx += row.length;
         }
     }
 
@@ -366,7 +370,7 @@ export function createImageBitmap(
        for (let i = 0; i < frame.data.length; i++) {
            const plane = frame.data[i];
            for (let y = 0; y < plane.length; y++) {
-               const row = plane[y];
+               const row = plane[y].subarray(0, image.codedWidth * 4);
                frameData.data.set(row, idx);
                idx += row.length;
            }
